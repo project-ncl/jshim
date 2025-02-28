@@ -19,3 +19,7 @@ The tool folder structure where we symlink the shims **to** should have the stru
 ```
 <tool folder>/<tool>/<tool>-<version>
 ```
+
+# TODO
+- Add a post-hook script after the installation of a tool. Groovy looks fine for it
+- Add support for mx, kotlin?
