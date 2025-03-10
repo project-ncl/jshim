@@ -1,0 +1,1 @@
+println("${TOOL_NAME} ${TOOL_VERSION} ${TOOL_HOME}")
