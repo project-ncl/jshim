@@ -36,16 +36,16 @@ class MavenToolTest {
 
     @Test
     void testShims() {
-        Map<String, Path> shims = mavenTool.shimAndSymlink("3.1.0");
+        Map<String, Path> shims = BasicTool.shimAndSymlink(mavenTool, "3.1.0");
 
         assertTrue(shims.containsKey("mvn"));
-        assertTrue(shims.get("mvn").toString().contains("tools/installed/maven/maven-3.1.0/bin/mvn"));
+        assertTrue(shims.get("mvn").toString().contains("tools/downloaded/maven/maven-3.1.0/bin/mvn"));
         assertFalse(shims.containsKey("not-binary"));
         assertFalse(shims.containsKey("folder"));
     }
 
     @Test
     void raiseErrorIfVersionNotFound() {
-        assertThrows(RuntimeException.class, () -> mavenTool.shimAndSymlink("9.9.9"));
+        assertThrows(RuntimeException.class, () -> BasicTool.shimAndSymlink(mavenTool, "9.9.9"));
     }
 }

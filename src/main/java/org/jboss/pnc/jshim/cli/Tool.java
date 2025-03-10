@@ -3,11 +3,13 @@ package org.jboss.pnc.jshim.cli;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.jboss.pnc.jshim.common.HomeFolder;
 import org.jboss.pnc.jshim.common.NameAndVersion;
 import org.jboss.pnc.jshim.constants.DefaultConstants;
 import org.jboss.pnc.jshim.tools.BasicTool;
@@ -21,7 +23,7 @@ import picocli.CommandLine;
                 Tool.ListAvailableLocal.class,
                 Tool.ListAvailableDownload.class,
                 Tool.Download.class,
-                Tool.Use.class },
+                Tool.Use.class, },
         name = "tool",
         description = "tool subcommand")
 @Slf4j
@@ -41,7 +43,7 @@ public class Tool {
 
     @CommandLine.Command(
             name = "list-versions-local",
-            description = "List available versions already installed or in the tools folder")
+            description = "List available versions already downloaded or in the tools folder")
     public static class ListAvailableLocal implements Runnable {
 
         @CommandLine.Parameters(
@@ -83,18 +85,18 @@ public class Tool {
 
             try {
                 BasicTool tool = ToolFactory.getTool(toolName);
-                Set<String> downloadableVersions = tool.getDownloadableVersions().keySet();
-                Set<String> installed = tool.availableVersions().keySet();
+                List<String> downloadableVersions = tool.getDownloadableVersions();
+                Set<String> downloaded = tool.availableVersions().keySet();
 
                 for (String version : downloadableVersions) {
-                    if (installed.contains(version)) {
+                    if (downloaded.contains(version)) {
                         System.out.println("* " + version);
                     } else {
                         System.out.println("  " + version);
                     }
                 }
 
-                System.out.println("\n* versions are already installed locally\n");
+                System.out.println("\n* versions are already downloaded locally\n");
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool {} is not supported", toolName);
             } catch (RuntimeException f) {
@@ -121,7 +123,7 @@ public class Tool {
                 NameAndVersion.NameAndVersionInfo nameAndVersionInfo = NameAndVersion.parseString(toolNameAndVersion);
 
                 BasicTool tool = ToolFactory.getTool(nameAndVersionInfo.getName());
-                tool.download(nameAndVersionInfo.getVersion());
+                BasicTool.download(tool, nameAndVersionInfo.getVersion());
 
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool is not supported");
@@ -152,21 +154,24 @@ public class Tool {
 
                 if (!availableVersions.containsKey(nameAndVersionInfo.getVersion())) {
                     log.error(
-                            "Version {} not present in the installed folder: {}",
+                            "Version {} not present in the downloaded folder: {}",
                             nameAndVersionInfo.getVersion(),
                             DefaultConstants.getToolFolder(tool.name()));
                 }
 
                 Path shimFolder = DefaultConstants.getShimFolder();
-                Map<String, Path> shimAndSymlink = tool.shimAndSymlink(nameAndVersionInfo.getVersion());
+                Map<String, Path> shimAndSymlink = BasicTool.shimAndSymlink(tool, nameAndVersionInfo.getVersion());
                 for (Map.Entry<String, Path> entry : shimAndSymlink.entrySet()) {
 
+                    // delete existing symlink if present
                     Path shim = shimFolder.resolve(entry.getKey());
                     Files.deleteIfExists(shim);
 
                     log.info("Setting '{}' to path '{}'", entry.getKey(), entry.getValue());
                     Files.createSymbolicLink(shim, entry.getValue());
                 }
+                HomeFolder.setEnvironmentVariableHome(tool, nameAndVersionInfo.getVersion());
+
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool is not supported");
             } catch (IOException | RuntimeException f) {

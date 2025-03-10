@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +42,11 @@ public class MavenTool implements BasicTool {
         StringSubstitutor sub = new StringSubstitutor(valuesMap);
 
         return sub.replace(DOWNLOAD_URL);
+    }
+
+    @Override
+    public Optional<String> envVarHomeDefinition() {
+        return Optional.of("M2_HOME");
     }
 
     @Override
