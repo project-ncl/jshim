@@ -48,7 +48,7 @@ public class Info implements Runnable {
 
         System.out.println();
         info.put("Data Path", DefaultConstants.getDataPath().toAbsolutePath().toString());
-        info.put("Tool Path", DefaultConstants.getInstalledFolder().toAbsolutePath().toString());
+        info.put("Tool Path", DefaultConstants.getDownloadedFolder().toAbsolutePath().toString());
         info.put("Shim Path", DefaultConstants.getShimFolder().toAbsolutePath().toString());
 
         System.out.println();

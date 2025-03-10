@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.jboss.pnc.jshim.common.FilesCommon;
@@ -13,7 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Encapsulate the logic of how to find the tool commands and where to find the tool folder for a specific version
+ * Encapsulate the logic of how to find the tool commands and where to find the tool folder for a specific version.
+ *
+ * We tried to minimize the number of methods to implement, providing default values where possible. The static methods
+ * aren't "default" method implementations since it's highly unlikely an implementaion will need to override its logic.
+ * If that assumption is wrong, move the static method back to a default method.
  *
  * Check out {@link org.jboss.pnc.jshim.constants.DefaultConstants} for how the tool folder is resolved
  */
@@ -33,7 +37,7 @@ public interface BasicTool {
     }
 
     /**
-     * List all versions available, and the path
+     * List all versions downloaded, and their path
      */
     default Map<String, Path> availableVersions() {
         // assumption that all downloaded versions are in <data path>/<tool>/<tool>-<version>
@@ -41,8 +45,53 @@ public interface BasicTool {
         return FilesCommon.availableVersionsBasedOnPrefix(DefaultConstants.getToolFolder(name()), name() + "-");
     }
 
+    /**
+     * List all the versions we can download. It's kinda hard to implement for every tool so right now the default is
+     * to just return nothing.
+     * 
+     * @return
+     */
     default List<String> getDownloadableVersions() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Get the download url for the version of the application
+     *
+     * @param version
+     * @return
+     * @throws UnsupportedOperationException
+     */
+    String downloadUrl(String version);
+
+    /**
+     * Override this method if you want to define an environment variable pointing to the home folder of the tool
+     * version
+     *
+     * @return an optional string which contains the environment variable name to define, which has as value the tool
+     *         version home folder
+     *         e.g "JAVA_HOME"
+     */
+    default Optional<String> envVarHomeDefinition() {
+        return Optional.empty();
+    }
+
+    // *****************************************************************************************************************
+    // Static Method Definitions
+    // *****************************************************************************************************************
+    /**
+     * Get the home folder of the tool, given the specific version
+     *
+     * @param version version of the home folder
+     * @return
+     */
+    static Path homeFolder(BasicTool tool, String version) {
+        Map<String, Path> available = tool.availableVersions();
+
+        if (!available.containsKey(version)) {
+            throw new RuntimeException(version + " is not found in the tool folder");
+        }
+        return available.get(version);
     }
 
     /**
@@ -54,14 +103,8 @@ public interface BasicTool {
      *
      * @return map of shims and the symlink it should point to
      */
-    default Map<String, Path> shimAndSymlink(String version) {
-        Map<String, Path> available = availableVersions();
-
-        if (!available.containsKey(version)) {
-            // TODO: print instead?
-            throw new RuntimeException(version + " is not found in the tool folder");
-        }
-        Path versionBinaryFolder = available.get(version).resolve(binaryFolderName());
+    static Map<String, Path> shimAndSymlink(BasicTool tool, String version) {
+        Path versionBinaryFolder = BasicTool.homeFolder(tool, version).resolve(tool.binaryFolderName());
 
         // we only want regular files that has the executable permission set
         Predicate<Path> isRegularFileAndExecutable = path -> path.toFile().isFile() && path.toFile().canExecute();
@@ -69,17 +112,14 @@ public interface BasicTool {
     }
 
     /**
-     * Download into the toolFolder the version of the application. By default, this isn't supported
+     * Default implementation of download method, based on the {@link #downloadUrl(String)} method
+     * It checks whether the tool version has already been downloaded.
      *
-     * @param version
-     * @return
-     * @throws UnsupportedOperationException
+     * @param versionToDownload
      */
-    String downloadUrl(String version);
+    static void download(BasicTool tool, String versionToDownload) {
 
-    default void download(String versionToDownload) {
-
-        Map<String, Path> availableVersions = this.availableVersions();
+        Map<String, Path> availableVersions = tool.availableVersions();
 
         if (availableVersions.containsKey(versionToDownload)) {
             log().error(
@@ -89,16 +129,16 @@ public interface BasicTool {
             return;
         }
 
-        Path toolFolder = DefaultConstants.getToolFolder(this.name());
+        Path toolFolder = DefaultConstants.getToolFolder(tool.name());
         FilesCommon.createFolderAndParent(toolFolder);
 
-        String downloadUrl = this.downloadUrl(versionToDownload);
+        String downloadUrl = tool.downloadUrl(versionToDownload);
 
-        Path toolVersionedFolder = DefaultConstants.getVersionedToolFolder(this.name(), versionToDownload);
+        Path toolVersionedFolder = DefaultConstants.getVersionedToolFolder(tool.name(), versionToDownload);
         FilesCommon.downloadAndUnarchive(downloadUrl, toolVersionedFolder);
     }
 
-    private Logger log() {
+    private static Logger log() {
         return LoggerFactory.getLogger(BasicTool.class);
     }
 }
