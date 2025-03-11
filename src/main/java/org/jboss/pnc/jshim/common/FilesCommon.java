@@ -3,6 +3,7 @@ package org.jboss.pnc.jshim.common;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -181,5 +182,24 @@ public class FilesCommon {
             System.out.println("Something went wrong");
         }
         return Data;
+    }
+
+    /**
+     * Get the folder where this program's jar is located
+     * 
+     * @return path of jar
+     */
+    public static Path getJarFolder() {
+        try {
+            return Path.of(
+                    new File(
+                            FilesCommon.class.getProtectionDomain()
+                                    .getCodeSource()
+                                    .getLocation()
+                                    .toURI()).getParent());
+        } catch (URISyntaxException e) {
+            log.error("Couldn't find the folder where this jar is located");
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -10,6 +10,7 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 import org.jboss.pnc.jshim.common.HomeFolder;
+import org.jboss.pnc.jshim.common.Hook;
 import org.jboss.pnc.jshim.common.NameAndVersion;
 import org.jboss.pnc.jshim.constants.DefaultConstants;
 import org.jboss.pnc.jshim.tools.BasicTool;
@@ -124,10 +125,10 @@ public class Tool {
 
                 BasicTool tool = ToolFactory.getTool(nameAndVersionInfo.getName());
                 BasicTool.download(tool, nameAndVersionInfo.getVersion());
-
+                Hook.runPostDownloadHookScript(tool, nameAndVersionInfo.getVersion());
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool is not supported");
-            } catch (RuntimeException f) {
+            } catch (IOException | RuntimeException f) {
                 log.error(f.getMessage());
             }
         }

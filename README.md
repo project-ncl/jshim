@@ -39,6 +39,23 @@ We'll then need to add the `JSHIM_SHIM_PATH` to our shell's path:
 $ export PATH=$JSHIM_SHIM_PATH:$PATH
 ```
 
+### Hooks
+
+Further customization is available after downloading a tool version using hooks. Hooks are Groovy scripts that can be
+run after downloading the tool version to customize it. An example is to set a custom `cacerts` file after a Java
+download, or set a custom `settings.xml` file for Maven.
+
+This is done by:
+1. Create a `hooks` folder in the same path as the jshim.jar file
+2. Inside the `hooks` folder, write a `<tool>-postdownload.groovy` file
+
+The following variables are injected into the Groovy script:
+- `TOOL_NAME`: the tool name
+- `TOOL_VERSION`: the tool version
+- `TOOL_HOME`: the home folder for the tool version
+
+An example of a postdownload groovy script can be found in: `examples/hooks/maven-postdownload.groovy`
+
 ## Home Environment Variable
 Some tools like `java` also needs to define an environment variable (`JAVA_HOME` for `java`) to work optimally.
 
@@ -56,6 +73,8 @@ command again since the home symlinked folder will be adjusted automatically. Ho
 the user to run the `source` command again to capture the new home environment variables
 to export.
 
+
+
 ## Tool Folder Structure
 The tool folder structure where we symlink the shims **to** has the structure:
 ```
@@ -64,5 +83,4 @@ The tool folder structure where we symlink the shims **to** has the structure:
 
 
 # TODO
-- Add a post-hook script after the installation of a tool. Groovy looks fine for it
 - Add support for mx, kotlin?
