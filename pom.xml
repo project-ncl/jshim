@@ -32,6 +32,7 @@
     <modules>
         <module>backend</module>
         <module>cli</module>
+        <module>server</module>
     </modules>
 
     <scm>
@@ -47,10 +48,20 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <picocli.version>4.7.6</picocli.version>
         <lombok.version>1.18.36</lombok.version>
+        <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+        <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+        <quarkus.platform.version>3.19.3</quarkus.platform.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>${quarkus.platform.group-id}</groupId>
+                <artifactId>${quarkus.platform.artifact-id}</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.jshim</groupId>
                 <artifactId>backend</artifactId>
@@ -59,6 +70,11 @@
             <dependency>
                 <groupId>org.jboss.pnc.jshim</groupId>
                 <artifactId>cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.jshim</groupId>
+                <artifactId>server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -117,6 +133,11 @@
                 <artifactId>junit-jupiter-engine</artifactId>
                 <version>5.12.1</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc</groupId>
+                <artifactId>pnc-api</artifactId>
+                <version>3.0.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
