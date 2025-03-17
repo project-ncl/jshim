@@ -81,6 +81,8 @@ The tool folder structure where we symlink the shims **to** has the structure:
 <jshim data path>/downloaded/<tool>/<tool>-<version>
 ```
 
+# TODO
+document building, where to find jshim.jar
 
 # TODO
 - Add support for mx, kotlin?

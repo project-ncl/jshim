@@ -4,11 +4,42 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>org.jboss.pnc.jshim</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
     <name>jshim</name>
     <description>Application to setup shims so that we can select the version of a tool to run</description>
-    <groupId>org.jboss.pnc</groupId>
-    <artifactId>jshim</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <url>https://github.com/project-ncl/jshim</url>
+    <inceptionYear>2025</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <organization>RedHat</organization>
+            <organizationUrl>http://www.redhat.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>backend</module>
+        <module>cli</module>
+    </modules>
+
+    <scm>
+        <connection>scm:git:http://github.com/project-ncl/jshim.git</connection>
+        <developerConnection>scm:git:git@github.com:project-ncl/jshim.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>http://github.com/project-ncl/jshim</url>
+    </scm>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -17,90 +48,129 @@
         <picocli.version>4.7.6</picocli.version>
         <lombok.version>1.18.36</lombok.version>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
-            <version>${picocli.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.18.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>3.0.24</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <!-- to download stuff -->
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
-        </dependency>
-        <dependency>
-            <!-- to unzip -->
-            <groupId>org.rauschig</groupId>
-            <artifactId>jarchivelib</artifactId>
-            <version>1.2.0</version>
-        </dependency>
-        <dependency>
-            <!-- logging -->
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.17</version>
-        </dependency>
-        <dependency>
-            <!-- for version -->
-            <groupId>com.github.zafarkhaja</groupId>
-            <artifactId>java-semver</artifactId>
-            <version>0.10.2</version>
-        </dependency>
-        <dependency>
-            <!-- for string template -->
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-text</artifactId>
-            <version>1.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.12.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jboss.pnc.jshim</groupId>
+                <artifactId>backend</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.jshim</groupId>
+                <artifactId>cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>${picocli.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>2.18.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy</artifactId>
+                <version>3.0.24</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <!-- to download stuff -->
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.18.0</version>
+            </dependency>
+            <dependency>
+                <!-- to unzip -->
+                <groupId>org.rauschig</groupId>
+                <artifactId>jarchivelib</artifactId>
+                <version>1.2.0</version>
+            </dependency>
+            <dependency>
+                <!-- logging -->
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.5.17</version>
+            </dependency>
+            <dependency>
+                <!-- for version -->
+                <groupId>com.github.zafarkhaja</groupId>
+                <artifactId>java-semver</artifactId>
+                <version>0.10.2</version>
+            </dependency>
+            <dependency>
+                <!-- for string template -->
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.13.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>5.12.1</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>jboss-nexus</id>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
+
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>Nexus Staging</id>
+            <url>https://oss.sonatype.org/content/groups/staging</url>
+        </repository>
+    </repositories>
+
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <!-- make sure we use the latest maven compiler plugin -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.0</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>info.picocli</groupId>
+                                <artifactId>picocli-codegen</artifactId>
+                                <version>${picocli.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <compilerArgs>
+                            <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
-            <plugin>
-                <!-- make sure we use the latest maven compiler plugin -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>info.picocli</groupId>
-                            <artifactId>picocli-codegen</artifactId>
-                            <version>${picocli.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                    <compilerArgs>
-                        <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
             <plugin>
                 <!-- code formatting -->
                 <groupId>com.diffplug.spotless</groupId>
@@ -135,105 +205,10 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- create a fat, executable jar -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <id>shade</id>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <finalName>jshim</finalName>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Implementation-Version>${project.version}</Implementation-Version>
-                                    </manifestEntries>
-                                    <mainClass>org.jboss.pnc.jshim.cli.App</mainClass>
-                                </transformer>
-                            </transformers>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <!-- If we're deploying this we should have a different classifier -->
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>shaded</shadedClassifierName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- get git information -->
-                <groupId>io.github.git-commit-id</groupId>
-                <artifactId>git-commit-id-maven-plugin</artifactId>
-                <version>9.0.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>revision</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <!--
-                      If you'd like to tell the plugin where your .git directory is,
-                      use this setting, otherwise we'll perform a search trying to
-                      figure out the right directory. It's better to add it explicite IMHO.
-                    -->
-                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
-                    <!-- false is default here, it prints some more information during the build -->
-                    <verbose>true</verbose>
-                </configuration>
-            </plugin>
-            <plugin>
-                <!-- put constant data into AutogeneratedConstants.java -->
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>maven-replacer-plugin</artifactId>
-                <version>1.4.1</version>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>src/main/templates/org/jboss/pnc/jshim/constants/AutogeneratedConstants.java</file>
-                    <outputFile>src/main/java/org/jboss/pnc/jshim/constants/AutogeneratedConstants.java</outputFile>
-                    <replacements>
-                        <replacement>
-                            <token>@name@</token>
-                            <value>${project.name}</value>
-                        </replacement>
-                        <replacement>
-                            <token>@description@</token>
-                            <value>${project.description}</value>
-                        </replacement>
-                        <replacement>
-                            <token>@version@</token>
-                            <value>${project.version}</value>
-                        </replacement>
-                        <replacement>
-                            <token>@commit-id@</token>
-                            <value>${git.commit.id.abbrev}</value>
-                        </replacement>
-                        <replacement>
-                            <token>@build-time@</token>
-                            <value>${maven.build.timestamp}</value>
-                        </replacement>
-                    </replacements>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.2</version>
             </plugin>
         </plugins>
     </build>
-
 </project>
