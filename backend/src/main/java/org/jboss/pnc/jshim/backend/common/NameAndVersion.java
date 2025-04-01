@@ -3,6 +3,9 @@ package org.jboss.pnc.jshim.backend.common;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * DTO + methods to represent the name and version of the tool to install
+ */
 public class NameAndVersion {
 
     @Data
@@ -12,6 +15,14 @@ public class NameAndVersion {
         private String version;
     }
 
+    /**
+     * Parse string of type {tool}@{version} into this DTO object
+     *
+     * @param nameAndVersion string to parse
+     * @return object
+     *
+     * @throws IllegalArgumentException if the string is not in the right format
+     */
     public static NameAndVersionInfo parseString(String nameAndVersion) {
         if (nameAndVersion.contains("@")) {
             String[] data = nameAndVersion.split("@");

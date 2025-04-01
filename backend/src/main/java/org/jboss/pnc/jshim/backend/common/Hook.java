@@ -12,6 +12,9 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Helper class to run hook script after a download is done
+ */
 @Slf4j
 public class Hook {
     /**
@@ -21,17 +24,20 @@ public class Hook {
      * @param version
      */
     public static void runPostDownloadHookScript(BasicTool tool, String version) throws IOException {
+        runPostDownloadHookScript(FilesCommon.getJarFolder(), tool, version);
+    }
 
-        Path jarHome = FilesCommon.getJarFolder();
-        Path hookFolder = jarHome.resolve(DefaultConstants.HOOK_FOLDER);
+    static void runPostDownloadHookScript(Path rootPath, BasicTool tool, String version) throws IOException {
+
+        Path hookFolder = rootPath.resolve(DefaultConstants.HOOK_FOLDER);
         Path toolPostHook = hookFolder.resolve(tool.name() + DefaultConstants.HOOK_POSTDOWNLOAD_SUFFIX);
 
         if (!Files.exists(toolPostHook)) {
-            log.debug("Postdownload script doesnt exist: '{}'", toolPostHook.toAbsolutePath());
+            log.debug("Post-download script doesn't exist: '{}'", toolPostHook.toAbsolutePath());
             // if the hook file doesn't exist, nothing to do
             return;
         }
-        log.info("Running postdownload script '{}'", toolPostHook);
+        log.info("Running post-download script '{}'", toolPostHook);
         GroovyShell shell = new GroovyShell(getBinding(tool, version));
         shell.run(toolPostHook.toFile(), new ArrayList<>());
     }
