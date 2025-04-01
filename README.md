@@ -98,3 +98,5 @@ You can then open the web-browser on http://localhost:8080 to interact with it
 
 # TODO
 - Add support for mx, kotlin?
+- Add checksum verification
+- Add more tests
