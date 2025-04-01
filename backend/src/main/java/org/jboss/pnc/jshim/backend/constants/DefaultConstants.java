@@ -70,7 +70,11 @@ public class DefaultConstants {
      * @return
      */
     public static Path getToolFolder(String nameOfTool) {
-        return getDownloadedFolder().resolve(nameOfTool);
+        return getToolFolder(getDownloadedFolder(), nameOfTool);
+    }
+
+    public static Path getToolFolder(Path overrideDownloadFolder, String nameOfTool) {
+        return overrideDownloadFolder.resolve(nameOfTool);
     }
 
     /**
@@ -81,7 +85,11 @@ public class DefaultConstants {
      * @return
      */
     public static Path getVersionedToolFolder(String nameOfTool, String version) {
-        return getToolFolder(nameOfTool).resolve(nameOfTool + "-" + version);
+        return getVersionedToolFolder(getDownloadedFolder(), nameOfTool, version);
+    }
+
+    public static Path getVersionedToolFolder(Path overrideDownloadFolder, String nameOfTool, String version) {
+        return getToolFolder(overrideDownloadFolder, nameOfTool).resolve(nameOfTool + "-" + version);
     }
 
     public static void setOverrideDataPath(Path path) {
