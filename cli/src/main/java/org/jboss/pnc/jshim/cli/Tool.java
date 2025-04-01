@@ -190,15 +190,15 @@ public class Tool {
 
         @CommandLine.Parameters(
                 arity = "1",
-                paramLabel = "folder",
-                description = "Specify the folder where to copy the tool's version")
-        String newFolder;
-
-        @CommandLine.Parameters(
-                arity = "1",
                 paramLabel = "tool@version",
                 description = "Specify the tool name and version")
         String toolNameAndVersion;
+
+        @CommandLine.Parameters(
+                arity = "1",
+                paramLabel = "folder",
+                description = "Specify the folder where to copy the tool's version")
+        String newFolder;
 
         @Override
         public void run() {
