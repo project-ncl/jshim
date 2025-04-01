@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Helper class to parse maven-metdata.xml
+ * Helper class to parse maven-metadata.xml, used by the maven repository
  */
 @Slf4j
 public class MavenMetadata {

@@ -73,16 +73,28 @@ command again since the home symlinked folder will be adjusted automatically. Ho
 the user to run the `source` command again to capture the new home environment variables
 to export.
 
-
-
 ## Tool Folder Structure
 The tool folder structure where we symlink the shims **to** has the structure:
 ```
 <jshim data path>/downloaded/<tool>/<tool>-<version>
 ```
 
-# TODO
-document building, where to find jshim.jar
+# Development
+Compile:
+```
+$ mvn clean install
+```
+
+The CLI can be found in: `cli/target/jshim.jar` and run as:
+```
+$ java -jar cli/target/jshim.jar
+```
+
+The server part can be found in: `server/target/jshim-server-runner.jar` and run as:
+```
+$ java -jar server/target/jshim-server-runner.jar
+```
+You can then open the web-browser on http://localhost:8080 to interact with it
 
 # TODO
 - Add support for mx, kotlin?
