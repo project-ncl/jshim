@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.jshim.backend.common.FilesCommon;
 import org.jboss.pnc.jshim.backend.common.HomeFolder;
 import org.jboss.pnc.jshim.backend.common.Hook;
 import org.jboss.pnc.jshim.backend.common.NameAndVersion;
@@ -23,6 +25,7 @@ import picocli.CommandLine;
                 Tool.ListAvailableLocal.class,
                 Tool.ListAvailableDownload.class,
                 Tool.Download.class,
+                Tool.Copy.class,
                 Tool.Use.class, },
         name = "tool",
         description = "tool subcommand")
@@ -172,6 +175,55 @@ public class Tool {
                 }
                 HomeFolder.setEnvironmentVariableHome(tool, nameAndVersionInfo.getVersion());
 
+            } catch (ToolFactory.ToolNotFoundException e) {
+                log.error("Tool is not supported");
+            } catch (IOException | RuntimeException f) {
+                log.error(f.getMessage());
+            }
+        }
+    }
+
+    @CommandLine.Command(
+            name = "copy",
+            description = "Copy the tool's versioned folder to another folder. This can be used to setup a different JSHIM_DATA_PATH with only the required tool's version needed")
+    public static class Copy implements Runnable {
+
+        @CommandLine.Parameters(
+                arity = "1",
+                paramLabel = "folder",
+                description = "Specify the folder where to copy the tool's version")
+        String newFolder;
+
+        @CommandLine.Parameters(
+                arity = "1",
+                paramLabel = "tool@version",
+                description = "Specify the tool name and version")
+        String toolNameAndVersion;
+
+        @Override
+        public void run() {
+
+            try {
+
+                NameAndVersion.NameAndVersionInfo nameAndVersionInfo = NameAndVersion.parseString(toolNameAndVersion);
+
+                BasicTool tool = ToolFactory.getTool(nameAndVersionInfo.getName());
+                Map<String, Path> availableVersions = tool.availableVersions();
+                if (!availableVersions.containsKey(nameAndVersionInfo.getVersion())) {
+                    log.error(
+                            "Version {} not present in the downloaded folder: {}",
+                            nameAndVersionInfo.getVersion(),
+                            DefaultConstants.getToolFolder(tool.name()));
+                }
+
+                Path currentToolVersion = availableVersions.get(nameAndVersionInfo.getVersion());
+
+                Path newPath = DefaultConstants.getVersionedToolFolder(
+                        Path.of(newFolder),
+                        nameAndVersionInfo.getName(),
+                        nameAndVersionInfo.getVersion());
+                FilesCommon.createFolderAndParent(newPath);
+                FileUtils.copyDirectory(currentToolVersion.toFile(), newPath.toFile());
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool is not supported");
             } catch (IOException | RuntimeException f) {
