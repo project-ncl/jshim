@@ -29,10 +29,12 @@ public class NameAndVersion {
             if (data.length >= 2) {
                 return new NameAndVersionInfo(data[0], data[1]);
             } else {
-                throw new IllegalArgumentException("Name and version should be in format: name@version");
+                throw new IllegalArgumentException(
+                        "Name and version should be in format: name@version, value provided: " + nameAndVersion);
             }
         } else {
-            throw new IllegalArgumentException("Name and version should be in format: name@version");
+            throw new IllegalArgumentException(
+                    "Name and version should be in format: name@version, value provided: " + nameAndVersion);
         }
     }
 }
