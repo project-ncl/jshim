@@ -97,6 +97,6 @@ $ java -jar server/target/jshim-server-runner.jar
 You can then open the web-browser on http://localhost:8080 to interact with it
 
 # TODO
-- Add support for mx, kotlin?
+- Add support for mx, kotlin, yarn?
 - Add checksum verification
 - Add more tests
