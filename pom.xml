@@ -109,7 +109,7 @@
                 <!-- logging -->
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.5.24</version>
+                <version>1.5.25</version>
             </dependency>
             <dependency>
                 <!-- for version -->
