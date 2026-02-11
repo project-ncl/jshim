@@ -174,24 +174,26 @@
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
                                 <version>${lombok.version}</version>
-                                </path>
-                                <path>
-                                    <groupId>com.google.errorprone</groupId>
-                                    <artifactId>error_prone_core</artifactId>
-                                    <version>2.23.0</version>
-                                </path>
-                                <path>
-                                    <!-- needed for error-prone -->
-                                    <groupId>io.quarkus</groupId>
-                                    <artifactId>quarkus-extension-processor</artifactId>
-                                    <version>${quarkus.platform.version}</version>
-                                </path>
+                            </path>
+                            <path>
+                                <groupId>com.google.errorprone</groupId>
+                                <artifactId>error_prone_core</artifactId>
+                                <version>2.47.0</version>
+                            </path>
+                            <path>
+                                <!-- needed for error-prone -->
+                                <groupId>io.quarkus</groupId>
+                                <artifactId>quarkus-extension-processor</artifactId>
+                                <version>${quarkus.platform.version}</version>
+                            </path>
                         </annotationProcessorPaths>
                         <compilerArgs>
                             <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
                             <arg>-XDcompilePolicy=simple</arg>
+                            <arg>--should-stop=ifError=FLOW</arg>
                             <!-- following configs are for error-prone :: mark all warnings as errors -->
                             <arg>-Xplugin:ErrorProne -XepExcludedPaths:.*/target/generated-sources/.*</arg>
+                            <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
                             <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                             <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
                             <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
