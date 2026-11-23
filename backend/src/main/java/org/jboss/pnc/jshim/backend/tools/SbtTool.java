@@ -1,6 +1,5 @@
 package org.jboss.pnc.jshim.backend.tools;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class SbtTool implements BasicTool {
             return MavenMetadata.getVersions(VERSIONS_URL);
         } catch (Exception e) {
             log.error("Error", e);
+            throw new RuntimeException(e);
         }
-        return Collections.emptyList();
     }
 }
