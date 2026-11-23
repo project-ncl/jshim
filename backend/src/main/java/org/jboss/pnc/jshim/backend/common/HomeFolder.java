@@ -74,8 +74,10 @@ public class HomeFolder {
     /**
      * Write the environment variables into the $ENVIRONMENT_VARIABLE_FILE for the user to "source"
      * The assumption is that the symlinked home folder is named as: ${HOME_FOLDER_PREFIX}{environmentVariable}
+     *
+     * @throws IOException if the file can't be written
      */
-    static void writeEnvVariableHomeToDefine() {
+    static void writeEnvVariableHomeToDefine() throws IOException {
 
         Path shimFolder = DefaultConstants.getShimFolder();
 
@@ -93,15 +95,11 @@ public class HomeFolder {
             String envVar = entry.getKey().replace(DefaultConstants.HOME_FOLDER_PREFIX, "");
             builder.append("export ").append(envVar).append("=").append(entry.getValue().toAbsolutePath()).append("\n");
         }
-        try {
-            log.info("Writing to '{}' the environment variables for the project", sourceInitScript);
-            Files.writeString(sourceInitScript, builder.toString());
-            log.info("");
-            log.info(
-                    "Please run in your terminal: 'source {}' to export the environment variables to your shell!",
-                    sourceInitScript);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        log.info("Writing to '{}' the environment variables for the project", sourceInitScript);
+        Files.writeString(sourceInitScript, builder.toString());
+        log.info("");
+        log.info(
+                "Please run in your terminal: 'source {}' to export the environment variables to your shell!",
+                sourceInitScript);
     }
 }
