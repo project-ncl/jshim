@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 import org.jboss.pnc.jshim.backend.common.FilesCommon;
@@ -23,13 +24,14 @@ import picocli.CommandLine;
         name = "info",
         description = "Print information about the application")
 @Slf4j
-public class Info implements Runnable {
+public class Info implements Callable<Integer> {
     @Override
-    public void run() {
+    public Integer call() {
 
         printEnvVars();
         printPathInformation();
-        printInstalledTools();
+        boolean success = printInstalledTools();
+        return success ? CommandLine.ExitCode.OK : CommandLine.ExitCode.SOFTWARE;
     }
 
     private static void printEnvVars() {
@@ -56,7 +58,11 @@ public class Info implements Runnable {
         }
     }
 
-    private static void printInstalledTools() {
+    /**
+     * @return false if some of the shims couldn't be read
+     */
+    private static boolean printInstalledTools() {
+        boolean success = true;
         System.out.println();
         System.out.println("Installed tools:\n");
 
@@ -79,10 +85,12 @@ public class Info implements Runnable {
                             Files.readSymbolicLink(shims.get(shimName)).toAbsolutePath());
                 } catch (IOException e) {
                     log.error("{}", e.getMessage());
+                    success = false;
                 }
             }
             System.out.println();
         }
 
+        return success;
     }
 }
