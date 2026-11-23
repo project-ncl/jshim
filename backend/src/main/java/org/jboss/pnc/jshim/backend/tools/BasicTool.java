@@ -1,5 +1,6 @@
 package org.jboss.pnc.jshim.backend.tools;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -116,23 +117,29 @@ public interface BasicTool {
      * It checks whether the tool version has already been downloaded.
      *
      * @param versionToDownload
+     * @throws IllegalArgumentException if the version can't be downloaded for this tool
+     * @throws IOException if the download or unarchiving fails
      */
-    static void download(BasicTool tool, String versionToDownload) {
+    static void download(BasicTool tool, String versionToDownload) throws IOException {
 
         Map<String, Path> availableVersions = tool.availableVersions();
 
         if (availableVersions.containsKey(versionToDownload)) {
-            log().error(
+            log().warn(
                     "Version: {} is already present in: {}",
                     versionToDownload,
                     availableVersions.get(versionToDownload));
             return;
         }
 
+        String downloadUrl = tool.downloadUrl(versionToDownload);
+        if (downloadUrl == null) {
+            throw new IllegalArgumentException(
+                    "Version " + versionToDownload + " of " + tool.name() + " is not available for download");
+        }
+
         Path toolFolder = DefaultConstants.getToolFolder(tool.name());
         FilesCommon.createFolderAndParent(toolFolder);
-
-        String downloadUrl = tool.downloadUrl(versionToDownload);
 
         Path toolVersionedFolder = DefaultConstants.getVersionedToolFolder(tool.name(), versionToDownload);
         FilesCommon.downloadAndUnarchive(downloadUrl, toolVersionedFolder);
