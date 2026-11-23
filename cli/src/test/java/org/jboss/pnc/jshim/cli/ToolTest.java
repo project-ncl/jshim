@@ -77,6 +77,17 @@ class ToolTest {
     }
 
     @Test
+    void useSucceedsWithoutExistingShimFolder() throws IOException {
+        Path shimFolder = DefaultConstants.getShimFolder();
+        assertFalse(Files.exists(shimFolder));
+
+        assertEquals(OK, run("tool", "use", "maven@3.1.0"));
+        assertEquals(
+                DefaultConstants.getVersionedToolFolder("maven", "3.1.0").resolve("bin").resolve("mvn"),
+                Files.readSymbolicLink(shimFolder.resolve("mvn")));
+    }
+
+    @Test
     void useFailsForUnsupportedTool() {
         assertEquals(FAILED, run("tool", "use", "unknown@1.0"));
     }

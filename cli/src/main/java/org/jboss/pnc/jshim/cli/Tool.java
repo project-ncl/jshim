@@ -181,6 +181,7 @@ public class Tool {
                     }
 
                     Path shimFolder = DefaultConstants.getShimFolder();
+                    FilesCommon.createFolderAndParent(shimFolder);
                     Map<String, Path> shimAndSymlink = BasicTool.shimAndSymlink(tool, nameAndVersionInfo.getVersion());
                     for (Map.Entry<String, Path> entry : shimAndSymlink.entrySet()) {
 
