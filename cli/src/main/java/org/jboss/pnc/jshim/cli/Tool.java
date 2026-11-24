@@ -119,6 +119,11 @@ public class Tool {
                 description = "Specify the tool name and version")
         String toolNameAndVersion;
 
+        @CommandLine.Option(
+                names = { "--url" },
+                description = "Download from this URL instead of the tool's default download URL. Must point to a zip or a (compressed) tar archive")
+        String url;
+
         @Override
         public void run() {
 
@@ -126,7 +131,7 @@ public class Tool {
                 NameAndVersion.NameAndVersionInfo nameAndVersionInfo = NameAndVersion.parseString(toolNameAndVersion);
 
                 BasicTool tool = ToolFactory.getTool(nameAndVersionInfo.getName());
-                BasicTool.download(tool, nameAndVersionInfo.getVersion());
+                BasicTool.download(tool, nameAndVersionInfo.getVersion(), url);
                 Hook.runPostDownloadHookScript(tool, nameAndVersionInfo.getVersion());
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool is not supported");

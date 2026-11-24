@@ -35,6 +35,11 @@
       <artifactId>jarchivelib</artifactId>
     </dependency>
     <dependency>
+      <!-- to detect the archive type of downloaded files -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <dependency>
       <!-- logging -->
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
