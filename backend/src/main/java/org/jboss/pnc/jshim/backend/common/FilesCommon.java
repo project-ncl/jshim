@@ -148,15 +148,19 @@ public class FilesCommon {
             } else {
 
                 Path tempFolder = Files.createTempDirectory("jshim-download-unzip");
-                new ProcessBuilder("unzip", tempFile.getAbsolutePath())
-                        .directory(tempFolder.toFile())
-                        .start()
-                        .waitFor();
+                try {
+                    new ProcessBuilder("unzip", tempFile.getAbsolutePath())
+                            .directory(tempFolder.toFile())
+                            .start()
+                            .waitFor();
 
-                File[] files = tempFolder.toFile().listFiles();
+                    File[] files = tempFolder.toFile().listFiles();
 
-                if (files.length >= 1) {
-                    FileUtils.copyDirectory(files[0], target.toFile());
+                    if (files.length >= 1) {
+                        FileUtils.copyDirectory(files[0], target.toFile());
+                    }
+                } finally {
+                    FileUtils.deleteQuietly(tempFolder.toFile());
                 }
             }
         } catch (Exception e) {
