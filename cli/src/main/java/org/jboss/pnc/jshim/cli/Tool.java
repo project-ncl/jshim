@@ -121,7 +121,7 @@ public class Tool {
 
         @CommandLine.Option(
                 names = { "--url" },
-                description = "Download from this URL instead of the tool's default download URL. Must end with .tar.gz or .zip")
+                description = "Download from this URL instead of the tool's default download URL. Must point to a zip or a (compressed) tar archive")
         String url;
 
         @Override

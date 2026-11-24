@@ -126,9 +126,11 @@ public class FilesCommon {
             log.info("Downloading: {}", downloadUrl);
             URL downloadUrlUrl = new URL(downloadUrl);
             FileUtils.copyURLToFile(downloadUrlUrl, tempFile);
-            log.info("Unzipping to: {}", target);
 
-            if (downloadUrl.endsWith(".tar.gz")) {
+            ArchiveType archiveType = ArchiveType.detect(tempFile.toPath());
+            log.info("Unarchiving {} to: {}", archiveType, target);
+
+            if (archiveType == ArchiveType.TAR) {
 
                 Files.createDirectory(target);
 
@@ -143,7 +145,7 @@ public class FilesCommon {
                         .start()
                         .waitFor();
 
-            } else if (downloadUrl.endsWith(".zip")) {
+            } else {
 
                 Path tempFolder = Files.createTempDirectory("jshim-download-unzip");
                 new ProcessBuilder("unzip", tempFile.getAbsolutePath())
@@ -156,8 +158,6 @@ public class FilesCommon {
                 if (files.length >= 1) {
                     FileUtils.copyDirectory(files[0], target.toFile());
                 }
-            } else {
-                log.error("Not supported archive: {}", downloadUrl);
             }
         } catch (Exception e) {
             log.error(e.toString());
