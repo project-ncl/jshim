@@ -116,8 +116,9 @@ public interface BasicTool {
      * It checks whether the tool version has already been downloaded.
      *
      * @param versionToDownload
+     * @param customUrl if not null, download from this url instead of {@link #downloadUrl(String)}
      */
-    static void download(BasicTool tool, String versionToDownload) {
+    static void download(BasicTool tool, String versionToDownload, String customUrl) {
 
         Map<String, Path> availableVersions = tool.availableVersions();
 
@@ -132,7 +133,7 @@ public interface BasicTool {
         Path toolFolder = DefaultConstants.getToolFolder(tool.name());
         FilesCommon.createFolderAndParent(toolFolder);
 
-        String downloadUrl = tool.downloadUrl(versionToDownload);
+        String downloadUrl = customUrl != null ? customUrl : tool.downloadUrl(versionToDownload);
 
         Path toolVersionedFolder = DefaultConstants.getVersionedToolFolder(tool.name(), versionToDownload);
         FilesCommon.downloadAndUnarchive(downloadUrl, toolVersionedFolder);
