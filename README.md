@@ -56,6 +56,16 @@ The following variables are injected into the Groovy script:
 
 An example of a postdownload groovy script can be found in: `examples/hooks/maven-postdownload.groovy`
 
+## Checksum Verification
+`tool download` can verify the downloaded archive against an expected checksum:
+```bash
+$ java -jar cli/target/jshim.jar tool download maven@3.9.9 --checksum sha256:<hex>
+```
+
+The checksum format is `<algorithm>:<hex>`. The algorithm is case-insensitive and can be a short name (e.g. `sha1`, `sha256`, `sha512`, `md5`) or any Java `MessageDigest` name (e.g. `SHA-256`, `SHA3-256`).
+
+If the checksum doesn't match, the download fails with a non-zero exit code. The downloaded archive is deleted, the tool version isn't extracted, and the post-download hook doesn't run.
+
 ## Home Environment Variable
 Some tools like `java` also needs to define an environment variable (`JAVA_HOME` for `java`) to work optimally.
 
@@ -98,5 +108,4 @@ You can then open the web-browser on http://localhost:8080 to interact with it
 
 # TODO
 - Add support for mx, kotlin, yarn?
-- Add checksum verification
 - Add more tests

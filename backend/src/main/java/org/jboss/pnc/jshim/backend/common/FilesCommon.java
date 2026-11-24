@@ -118,11 +118,15 @@ public class FilesCommon {
      * Download the url, unarchive it and put it in the target folder.
      * If anything goes wrong, the target folder is removed.
      *
+     * On checksum mismatch, the archive is discarded and the target folder is not created
+     *
      * @param downloadUrl
      * @param target
+     * @param checksum expected checksum of the downloaded archive, or null to skip verification
      * @throws IOException if the archive type is not supported, or the download or unarchiving fails
+     * @throws Checksum.ChecksumMismatchException if the downloaded archive doesn't match the checksum
      */
-    public static void downloadAndUnarchive(String downloadUrl, Path target) throws IOException {
+    public static void downloadAndUnarchive(String downloadUrl, Path target, Checksum checksum) throws IOException {
         if (!downloadUrl.endsWith(".tar.gz") && !downloadUrl.endsWith(".zip")) {
             throw new IOException("Not supported archive: " + downloadUrl);
         }
@@ -142,6 +146,12 @@ public class FilesCommon {
             } catch (IOException e) {
                 throw new IOException("Failed to download " + downloadUrl + ": " + e, e);
             }
+
+            if (checksum != null) {
+                log.info("Verifying {} checksum", checksum.getAlgorithm());
+                checksum.verify(tempFile.toPath());
+            }
+
             log.info("Unzipping to: {}", target);
 
             if (downloadUrl.endsWith(".tar.gz")) {
