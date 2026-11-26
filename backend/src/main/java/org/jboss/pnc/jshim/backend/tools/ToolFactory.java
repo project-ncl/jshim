@@ -10,6 +10,7 @@ public class ToolFactory {
             new GradleTool(),
             new NodeTool(),
             new NpmTool(),
+            new YarnTool(),
             new SbtTool(),
             new GolangTool(),
             new JavaTool(),
