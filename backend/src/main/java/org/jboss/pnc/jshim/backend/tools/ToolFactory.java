@@ -11,6 +11,7 @@ public class ToolFactory {
             new NodeTool(),
             new SbtTool(),
             new GolangTool(),
+            new MxTool(),
             new JavaTool(),
     };
 
