@@ -12,6 +12,7 @@ public class ToolFactory {
             new SbtTool(),
             new GolangTool(),
             new JavaTool(),
+            new KotlinTool(),
     };
 
     private static final Map<String, BasicTool> TOOLS_MAP = new HashMap<>();
