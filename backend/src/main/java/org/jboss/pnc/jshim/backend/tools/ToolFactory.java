@@ -9,6 +9,7 @@ public class ToolFactory {
             new MavenTool(),
             new GradleTool(),
             new NodeTool(),
+            new NpmTool(),
             new SbtTool(),
             new GolangTool(),
             new JavaTool(),

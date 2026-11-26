@@ -128,7 +128,7 @@ public class FilesCommon {
             FileUtils.copyURLToFile(downloadUrlUrl, tempFile);
             log.info("Unzipping to: {}", target);
 
-            if (downloadUrl.endsWith(".tar.gz")) {
+            if (downloadUrl.endsWith(".tar.gz") || downloadUrl.endsWith(".tgz")) {
 
                 Files.createDirectory(target);
 
