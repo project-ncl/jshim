@@ -148,6 +148,8 @@ public class FilesCommon {
                 Path tempFolder = Files.createTempDirectory("jshim-download-unzip");
                 new ProcessBuilder("unzip", tempFile.getAbsolutePath())
                         .directory(tempFolder.toFile())
+                        .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                        .redirectError(ProcessBuilder.Redirect.INHERIT)
                         .start()
                         .waitFor();
 
