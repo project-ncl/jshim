@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
 import org.jboss.pnc.jshim.backend.common.FilesCommon;
@@ -18,7 +19,12 @@ import org.jboss.pnc.jshim.backend.tools.ToolFactory;
 
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine;
+import picocli.CommandLine.ExitCode;
 
+/**
+ * Commands return {@link ExitCode#OK} on success and {@link ExitCode#SOFTWARE} if anything failed.
+ * Commands taking several tool@version arguments still process all of them, but fail if any one of them failed.
+ */
 @CommandLine.Command(
         subcommands = {
                 Tool.ListSupported.class,
@@ -47,7 +53,7 @@ public class Tool {
     @CommandLine.Command(
             name = "list-versions-local",
             description = "List available versions already downloaded or in the tools folder")
-    public static class ListAvailableLocal implements Runnable {
+    public static class ListAvailableLocal implements Callable<Integer> {
 
         @CommandLine.Parameters(
                 arity = "1",
@@ -56,7 +62,7 @@ public class Tool {
         String toolName;
 
         @Override
-        public void run() {
+        public Integer call() {
 
             try {
                 BasicTool tool = ToolFactory.getTool(toolName);
@@ -64,18 +70,20 @@ public class Tool {
                 for (String version : versions) {
                     System.out.println(version);
                 }
+                return ExitCode.OK;
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool {} is not supported", toolName);
             } catch (RuntimeException f) {
                 log.error(f.getMessage());
             }
+            return ExitCode.SOFTWARE;
         }
     }
 
     @CommandLine.Command(
             name = "list-versions-download",
             description = "List available versions we can download")
-    public static class ListAvailableDownload implements Runnable {
+    public static class ListAvailableDownload implements Callable<Integer> {
 
         @CommandLine.Parameters(
                 arity = "1",
@@ -84,7 +92,7 @@ public class Tool {
         String toolName;
 
         @Override
-        public void run() {
+        public Integer call() {
 
             try {
                 BasicTool tool = ToolFactory.getTool(toolName);
@@ -100,18 +108,20 @@ public class Tool {
                 }
 
                 System.out.println("\n* versions are already downloaded locally\n");
+                return ExitCode.OK;
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool {} is not supported", toolName);
             } catch (RuntimeException f) {
                 log.error(f.getMessage());
             }
+            return ExitCode.SOFTWARE;
         }
     }
 
     @CommandLine.Command(
             name = "download",
             description = "Download the tool's version")
-    public static class Download implements Runnable {
+    public static class Download implements Callable<Integer> {
 
         @CommandLine.Parameters(
                 arity = "1",
@@ -120,7 +130,7 @@ public class Tool {
         String toolNameAndVersion;
 
         @Override
-        public void run() {
+        public Integer call() {
 
             try {
                 NameAndVersion.NameAndVersionInfo nameAndVersionInfo = NameAndVersion.parseString(toolNameAndVersion);
@@ -128,26 +138,31 @@ public class Tool {
                 BasicTool tool = ToolFactory.getTool(nameAndVersionInfo.getName());
                 BasicTool.download(tool, nameAndVersionInfo.getVersion());
                 Hook.runPostDownloadHookScript(tool, nameAndVersionInfo.getVersion());
+                return ExitCode.OK;
             } catch (ToolFactory.ToolNotFoundException e) {
                 log.error("Tool is not supported");
             } catch (IOException | RuntimeException f) {
                 log.error(f.getMessage());
             }
+            return ExitCode.SOFTWARE;
         }
     }
 
     @CommandLine.Command(
             name = "use",
             description = "select which tool version to use")
-    public static class Use implements Runnable {
+    public static class Use implements Callable<Integer> {
 
         @CommandLine.Parameters(
+                arity = "1..*",
                 paramLabel = "tool@version",
                 description = "Specify the tool name and version")
         String[] toolNameAndVersions;
 
         @Override
-        public void run() {
+        public Integer call() {
+            boolean failed = false;
+
             for (String toolNameAndVersion : toolNameAndVersions) {
                 try {
                     NameAndVersion.NameAndVersionInfo nameAndVersionInfo = NameAndVersion
@@ -161,9 +176,12 @@ public class Tool {
                                 "Version {} not present in the downloaded folder: {}",
                                 nameAndVersionInfo.getVersion(),
                                 DefaultConstants.getToolFolder(tool.name()));
+                        failed = true;
+                        continue;
                     }
 
                     Path shimFolder = DefaultConstants.getShimFolder();
+                    FilesCommon.createFolderAndParent(shimFolder);
                     Map<String, Path> shimAndSymlink = BasicTool.shimAndSymlink(tool, nameAndVersionInfo.getVersion());
                     for (Map.Entry<String, Path> entry : shimAndSymlink.entrySet()) {
 
@@ -178,19 +196,22 @@ public class Tool {
 
                 } catch (ToolFactory.ToolNotFoundException e) {
                     log.error("Tool is not supported");
+                    failed = true;
                 } catch (IOException | RuntimeException f) {
                     log.error(f.getMessage());
+                    failed = true;
                 }
             }
 
             log.info("=>  Add '{}' to your shell's path!", DefaultConstants.getShimFolder());
+            return failed ? ExitCode.SOFTWARE : ExitCode.OK;
         }
     }
 
     @CommandLine.Command(
             name = "copy",
             description = "Copy the tool's versioned folder to another folder. This can be used to setup a different JSHIM_DATA_PATH with only the required tool's version needed")
-    public static class Copy implements Runnable {
+    public static class Copy implements Callable<Integer> {
 
         @CommandLine.Option(
                 names = { "--new-folder" },
@@ -199,12 +220,14 @@ public class Tool {
         String newFolder;
 
         @CommandLine.Parameters(
+                arity = "1..*",
                 paramLabel = "tool@version",
                 description = "Specify the tool name and version")
         String[] toolNameAndVersions;
 
         @Override
-        public void run() {
+        public Integer call() {
+            boolean failed = false;
 
             for (String toolNameAndVersion : toolNameAndVersions) {
                 try {
@@ -219,6 +242,8 @@ public class Tool {
                                 "Version {} not present in the downloaded folder: {}",
                                 nameAndVersionInfo.getVersion(),
                                 DefaultConstants.getToolFolder(tool.name()));
+                        failed = true;
+                        continue;
                     }
 
                     Path currentToolVersion = availableVersions.get(nameAndVersionInfo.getVersion());
@@ -231,10 +256,13 @@ public class Tool {
                     FileUtils.copyDirectory(currentToolVersion.toFile(), newPath.toFile());
                 } catch (ToolFactory.ToolNotFoundException e) {
                     log.error("Tool is not supported");
+                    failed = true;
                 } catch (IOException | RuntimeException f) {
                     log.error(f.getMessage());
+                    failed = true;
                 }
             }
+            return failed ? ExitCode.SOFTWARE : ExitCode.OK;
         }
     }
 }

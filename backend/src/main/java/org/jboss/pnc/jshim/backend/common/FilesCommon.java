@@ -3,9 +3,11 @@ package org.jboss.pnc.jshim.backend.common;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -113,58 +115,84 @@ public class FilesCommon {
     }
 
     /**
-     * Download the url, unarchive it and put it in the target folder
+     * Download the url, unarchive it and put it in the target folder.
+     * If anything goes wrong, the target folder is removed.
      *
      * @param downloadUrl
      * @param target
+     * @throws IOException if the archive type is not supported, or the download or unarchiving fails
      */
-    public static void downloadAndUnarchive(String downloadUrl, Path target) {
+    public static void downloadAndUnarchive(String downloadUrl, Path target) throws IOException {
+        if (!downloadUrl.endsWith(".tar.gz") && !downloadUrl.endsWith(".zip")) {
+            throw new IOException("Not supported archive: " + downloadUrl);
+        }
+
+        if (Files.exists(target, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Target folder already exists: " + target);
+        }
+
         File tempFile = null;
+        boolean success = false;
 
         try {
             tempFile = Files.createTempFile("temp-download-", ".archive").toFile();
             log.info("Downloading: {}", downloadUrl);
-            URL downloadUrlUrl = new URL(downloadUrl);
-            FileUtils.copyURLToFile(downloadUrlUrl, tempFile);
+            try {
+                FileUtils.copyURLToFile(new URL(downloadUrl), tempFile);
+            } catch (IOException e) {
+                throw new IOException("Failed to download " + downloadUrl + ": " + e, e);
+            }
             log.info("Unzipping to: {}", target);
 
             if (downloadUrl.endsWith(".tar.gz")) {
 
                 Files.createDirectory(target);
 
-                new ProcessBuilder(
-                        "tar",
-                        "xf",
-                        tempFile.getAbsolutePath(),
-                        "-C",
-                        ".",
-                        "--strip-components=1")
-                        .directory(target.toFile())
-                        .start()
-                        .waitFor();
+                runProcess(target, "tar", "xf", tempFile.getAbsolutePath(), "-C", ".", "--strip-components=1");
 
-            } else if (downloadUrl.endsWith(".zip")) {
+            } else {
 
                 Path tempFolder = Files.createTempDirectory("jshim-download-unzip");
-                new ProcessBuilder("unzip", tempFile.getAbsolutePath())
-                        .directory(tempFolder.toFile())
-                        .start()
-                        .waitFor();
+                runProcess(tempFolder, "unzip", tempFile.getAbsolutePath());
 
                 File[] files = tempFolder.toFile().listFiles();
 
-                if (files.length >= 1) {
-                    FileUtils.copyDirectory(files[0], target.toFile());
+                if (files == null || files.length == 0) {
+                    throw new IOException("Archive is empty: " + downloadUrl);
                 }
-            } else {
-                log.error("Not supported archive: {}", downloadUrl);
+                FileUtils.copyDirectory(files[0], target.toFile());
             }
-        } catch (Exception e) {
-            log.error(e.toString());
+            success = true;
         } finally {
             if (tempFile != null) {
                 tempFile.delete();
             }
+            if (!success) {
+                FileUtils.deleteQuietly(target.toFile());
+            }
+        }
+    }
+
+    /**
+     * Run an external command in the working directory and wait for it to finish.
+     */
+    private static void runProcess(Path workingDirectory, String... command) throws IOException {
+        Process process = new ProcessBuilder(command).directory(workingDirectory.toFile())
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                .redirectError(ProcessBuilder.Redirect.INHERIT)
+                .start();
+
+        int exitCode;
+        try {
+            exitCode = process.waitFor();
+        } catch (InterruptedException e) {
+            process.destroy();
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while running " + command[0], e);
+        }
+
+        if (exitCode != 0) {
+            throw new IOException(command[0] + " failed with exit code " + exitCode);
         }
     }
 
