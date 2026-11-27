@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import org.jboss.pnc.jshim.backend.common.Checksum;
 import org.jboss.pnc.jshim.backend.common.FilesCommon;
 import org.jboss.pnc.jshim.backend.constants.DefaultConstants;
 import org.slf4j.Logger;
@@ -117,10 +118,13 @@ public interface BasicTool {
      * It checks whether the tool version has already been downloaded.
      *
      * @param versionToDownload
+     * @param checksum expected checksum of the downloaded archive, or null to skip verification\
+     * 
      * @throws IllegalArgumentException if the version can't be downloaded for this tool
      * @throws IOException if the download or unarchiving fails
+     * @throws Checksum.ChecksumMismatchException if the downloaded archive doesn't match the checksum
      */
-    static void download(BasicTool tool, String versionToDownload) throws IOException {
+    static void download(BasicTool tool, String versionToDownload, Checksum checksum) throws IOException {
 
         Map<String, Path> availableVersions = tool.availableVersions();
 
@@ -142,7 +146,7 @@ public interface BasicTool {
         FilesCommon.createFolderAndParent(toolFolder);
 
         Path toolVersionedFolder = DefaultConstants.getVersionedToolFolder(tool.name(), versionToDownload);
-        FilesCommon.downloadAndUnarchive(downloadUrl, toolVersionedFolder);
+        FilesCommon.downloadAndUnarchive(downloadUrl, toolVersionedFolder, checksum);
     }
 
     private static Logger log() {

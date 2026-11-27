@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.jshim.backend.common.Checksum;
 import org.jboss.pnc.jshim.backend.common.FilesCommon;
 import org.jboss.pnc.jshim.backend.common.HomeFolder;
 import org.jboss.pnc.jshim.backend.common.Hook;
@@ -129,14 +130,21 @@ public class Tool {
                 description = "Specify the tool name and version")
         String toolNameAndVersion;
 
+        @CommandLine.Option(
+                names = { "--checksum" },
+                paramLabel = "<algorithm>:<hex>",
+                description = "Expected checksum of the downloaded archive, e.g. sha256:<hex>. On mismatch, the download fails and nothing is installed")
+        String checksum;
+
         @Override
         public Integer call() {
 
             try {
                 NameAndVersion.NameAndVersionInfo nameAndVersionInfo = NameAndVersion.parseString(toolNameAndVersion);
+                Checksum expectedChecksum = checksum == null ? null : Checksum.parse(checksum);
 
                 BasicTool tool = ToolFactory.getTool(nameAndVersionInfo.getName());
-                BasicTool.download(tool, nameAndVersionInfo.getVersion());
+                BasicTool.download(tool, nameAndVersionInfo.getVersion(), expectedChecksum);
                 Hook.runPostDownloadHookScript(tool, nameAndVersionInfo.getVersion());
                 return ExitCode.OK;
             } catch (ToolFactory.ToolNotFoundException e) {

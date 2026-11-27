@@ -27,7 +27,7 @@ class FilesCommonTest {
         assertEquals(0, tar.waitFor());
 
         Path target = tmpDir.resolve("target");
-        FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target);
+        FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target, null);
 
         assertTrue(Files.isRegularFile(target.resolve("bin").resolve("tool")));
     }
@@ -37,7 +37,9 @@ class FilesCommonTest {
         Path archive = Files.writeString(tmpDir.resolve("corrupt.tar.gz"), "not an archive");
         Path target = tmpDir.resolve("target");
 
-        assertThrows(IOException.class, () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target));
+        assertThrows(
+                IOException.class,
+                () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target, null));
         assertFalse(Files.exists(target));
     }
 
@@ -46,7 +48,9 @@ class FilesCommonTest {
         Path archive = Files.writeString(tmpDir.resolve("corrupt.zip"), "not an archive");
         Path target = tmpDir.resolve("target");
 
-        assertThrows(IOException.class, () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target));
+        assertThrows(
+                IOException.class,
+                () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target, null));
         assertFalse(Files.exists(target));
     }
 
@@ -55,7 +59,9 @@ class FilesCommonTest {
         Path archive = tmpDir.resolve("missing.tar.gz");
         Path target = tmpDir.resolve("target");
 
-        assertThrows(IOException.class, () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target));
+        assertThrows(
+                IOException.class,
+                () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target, null));
         assertFalse(Files.exists(target));
     }
 
@@ -64,7 +70,9 @@ class FilesCommonTest {
         Path archive = Files.writeString(tmpDir.resolve("tool.rar"), "not an archive");
         Path target = tmpDir.resolve("target");
 
-        assertThrows(IOException.class, () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target));
+        assertThrows(
+                IOException.class,
+                () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target, null));
         assertFalse(Files.exists(target));
     }
 
@@ -75,7 +83,9 @@ class FilesCommonTest {
         Path existingFile = Files.createDirectories(target).resolve("existing");
         Files.writeString(existingFile, "keep me");
 
-        assertThrows(IOException.class, () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target));
+        assertThrows(
+                IOException.class,
+                () -> FilesCommon.downloadAndUnarchive(archive.toUri().toString(), target, null));
         assertTrue(Files.exists(existingFile));
     }
 }
