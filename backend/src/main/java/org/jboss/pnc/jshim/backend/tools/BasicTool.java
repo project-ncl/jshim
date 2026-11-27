@@ -77,6 +77,20 @@ public interface BasicTool {
         return Optional.empty();
     }
 
+    /**
+     * Shims to create and the file each one links to. By default, every executable file in the binary folder.
+     *
+     * @param home home folder of the tool version
+     *
+     * @return map of shims and the symlink it should point to
+     */
+    default Map<String, Path> shims(Path home) {
+        Path binaryFolder = home.resolve(binaryFolderName());
+
+        Predicate<Path> isRegularFileAndExecutable = path -> path.toFile().isFile() && path.toFile().canExecute();
+        return FilesCommon.nameOfFileAndPathFromFolder(binaryFolder, isRegularFileAndExecutable);
+    }
+
     // *****************************************************************************************************************
     // Static Method Definitions
     // *****************************************************************************************************************
@@ -96,20 +110,15 @@ public interface BasicTool {
     }
 
     /**
-     * Return the name of the shims, and where the shims should symlink to. By default, the shim name is the same as
-     * the commands found inside the binary folder for that tool. The command must be a regular file and have the
-     * executable permission
+     * Return the name of the shims, and where the shims should symlink to, for that version of the tool. See
+     * {@link #shims(Path)}
      *
      * @param version version of the tool
      *
      * @return map of shims and the symlink it should point to
      */
     static Map<String, Path> shimAndSymlink(BasicTool tool, String version) {
-        Path versionBinaryFolder = BasicTool.homeFolder(tool, version).resolve(tool.binaryFolderName());
-
-        // we only want regular files that has the executable permission set
-        Predicate<Path> isRegularFileAndExecutable = path -> path.toFile().isFile() && path.toFile().canExecute();
-        return FilesCommon.nameOfFileAndPathFromFolder(versionBinaryFolder, isRegularFileAndExecutable);
+        return tool.shims(BasicTool.homeFolder(tool, version));
     }
 
     /**

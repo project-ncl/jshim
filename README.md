@@ -73,6 +73,13 @@ command again since the home symlinked folder will be adjusted automatically. Ho
 the user to run the `source` command again to capture the new home environment variables
 to export.
 
+## Node.js and npm
+`nodejs` comes with its own npm. To use a different npm version, `use` the `npm` tool after `nodejs`:
+```bash
+$ jshim tool use nodejs@26.13.1 npm@12.2.3
+```
+Running `use nodejs` again switches back to its own npm.
+
 ## Tool Folder Structure
 The tool folder structure where we symlink the shims **to** has the structure:
 ```
@@ -97,6 +104,6 @@ $ java -jar server/target/jshim-server-runner.jar
 You can then open the web-browser on http://localhost:8080 to interact with it
 
 # TODO
-- Add support for mx, kotlin, yarn?
+- Add support for mx, kotlin?
 - Add checksum verification
 - Add more tests

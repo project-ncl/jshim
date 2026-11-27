@@ -144,7 +144,7 @@ public class FilesCommon {
             }
             log.info("Unzipping to: {}", target);
 
-            if (downloadUrl.endsWith(".tar.gz")) {
+            if (downloadUrl.endsWith(".tar.gz") || downloadUrl.endsWith(".tgz")) {
 
                 Files.createDirectory(target);
 
